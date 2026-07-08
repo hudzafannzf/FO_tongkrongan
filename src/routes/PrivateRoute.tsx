@@ -1,25 +1,18 @@
+import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
-
-import type { JSX } from "react/jsx-runtime";
-import { storage } from "../utils/storage";
-
-export default function PrivateRoute({
-
-children
-
-}:{
-
-children:JSX.Element
-
-}){
-
-if(!storage.getToken()){
-
-return <Navigate to="/login"/>;
-
+interface Props {
+  children: ReactNode;
 }
 
-return children;
+function PrivateRoute({ children }: Props) {
+  const token = localStorage.getItem("token");
 
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
+
+export default PrivateRoute;

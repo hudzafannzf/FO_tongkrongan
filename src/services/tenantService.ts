@@ -1,25 +1,26 @@
-import api from "../api/axios";
+import api from "./api";
 
-const tenantService = {
-  getAll() {
-    return api.get("/tenant");
-  },
-
-  getById(id: number) {
-    return api.get(`/tenant/${id}`);
-  },
-
-  create(data: unknown) {
-    return api.post("/tenant", data);
-  },
-
-  update(id: number, data: unknown) {
-    return api.put(`/tenant/${id}`, data);
-  },
-
-  delete(id: number) {
-    return api.delete(`/tenant/${id}`);
-  },
+export const getTenants = async () => {
+  const response = await api.get("/tenant");
+  return response.data;
 };
 
-export default tenantService;
+export const getTenantById = async (id: number) => {
+  const response = await api.get(`/tenant/${id}`);
+  return response.data;
+};
+
+export const createTenant = async (data: any) => {
+  const response = await api.post("/tenant", data);
+  return response.data;
+};
+
+export const updateTenant = async (id: number, data: any) => {
+  const response = await api.put(`/tenant/${id}`, data);
+  return response.data;
+};
+
+export const deleteTenant = async (id: number) => {
+  const response = await api.delete(`/tenant/${id}`);
+  return response.data;
+};

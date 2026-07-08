@@ -1,30 +1,23 @@
+import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
-import useAuth from "../hooks/useAuth";
-import type { JSX } from "react/jsx-runtime";
-
-export default function RoleRoute({
-
-children,
-
-role
-
-}:{
-
-children:JSX.Element;
-
-role:string;
-
-}){
-
-const {user}=useAuth();
-
-if(user?.role!==role){
-
-return <Navigate to="/"/>;
-
+interface Props {
+  children: ReactNode;
+  role: string;
 }
 
-return children;
+function RoleRoute({ children, role }: Props) {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 }
+
+export default RoleRoute;

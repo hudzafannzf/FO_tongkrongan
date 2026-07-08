@@ -1,7 +1,15 @@
-export default function Footer() {
+function Footer() {
   return (
-    <footer className="bg-gray-100 py-8 text-center">
-      © 2026 Tegal Culinary
+    <footer
+      style={{
+        padding: 20,
+        textAlign: "center",
+        background: "#ddd",
+      }}
+    >
+      © 2026 SPK Tongkrongan
     </footer>
   );
 }
+
+export default Footer;
