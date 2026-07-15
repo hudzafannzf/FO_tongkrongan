@@ -1,37 +1,30 @@
-import type { ReactNode } from "react";
-import Header from "./Header";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import Footer from "./Footer";
 
-interface Props {
-  children: ReactNode;
-}
 
-function DashboardLayout({ children }: Props) {
+function DashboardLayout() {
   return (
-    <>
-      <Header />
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+      }}
+    >
+      <Sidebar />
 
       <div
         style={{
-          display: "flex",
+          flex: 1,
+          padding: "20px",
+          background: "#f5f5f5",
+          overflow: "auto",
         }}
       >
-        <Sidebar />
-
-        <main
-          style={{
-            flex: 1,
-            padding: 30,
-          }}
-        >
-          {children}
-        </main>
+        <Outlet />
       </div>
-
-      <Footer />
-    </>
+    </div>
   );
 }
+console.log("DashboardLayout Render");
 
 export default DashboardLayout;
