@@ -6,7 +6,7 @@ import axios from "axios";
 const CRITERIA = [
   {
     name: "harga",
-    title: "Harga",
+    title: "Harga (Prioritas)",
     desc: "Pilih rentang harga yang Anda inginkan.",
     options: [
       { label: "< 15.000", value: 5 },
@@ -18,7 +18,7 @@ const CRITERIA = [
   },
   {
     name: "jamOperasional",
-    title: "Jam Operasional",
+    title: "Jam Operasional (Prioritas)",
     desc: "Pilih jam operasional yang Anda harapkan.",
     options: [
       { label: "< 8 jam/hari", value: 1 },
@@ -29,32 +29,8 @@ const CRITERIA = [
     ],
   },
   {
-    name: "fasilitas",
-    title: "Fasilitas",
-    desc: "Pilih tingkat kelengkapan fasilitas.",
-    options: [
-      { label: "Sangat Kurang", value: 1 },
-      { label: "Kurang", value: 2 },
-      { label: "Cukup", value: 3 },
-      { label: "Lengkap", value: 4 },
-      { label: "Sangat Lengkap", value: 5 },
-    ],
-  },
-  {
-    name: "menu",
-    title: "Menu",
-    desc: "Pilih jumlah pilihan menu.",
-    options: [
-      { label: "<= 10 menu", value: 1 },
-      { label: "11 - 20 menu", value: 2 },
-      { label: "21 - 30 menu", value: 3 },
-      { label: "31 - 40 menu", value: 4 },
-      { label: ">= 41 menu", value: 5 },
-    ],
-  },
-  {
     name: "rating",
-    title: "Rating",
+    title: "Rating (Prioritas)",
     desc: "Pilih target rating tempat.",
     options: [
       { label: "Rating 1-2", value: 1 },
@@ -70,8 +46,32 @@ const CRITERIA = [
     ],
   },
   {
+    name: "fasilitas",
+    title: "Fasilitas (Pendukung)",
+    desc: "Pilih tingkat kelengkapan fasilitas.",
+    options: [
+      { label: "Sangat Kurang", value: 1 },
+      { label: "Kurang", value: 2 },
+      { label: "Cukup", value: 3 },
+      { label: "Lengkap", value: 4 },
+      { label: "Sangat Lengkap", value: 5 },
+    ],
+  },
+  {
+    name: "menu",
+    title: "Menu (Pendukung)",
+    desc: "Pilih jumlah pilihan menu.",
+    options: [
+      { label: "<= 10 menu", value: 1 },
+      { label: "11 - 20 menu", value: 2 },
+      { label: "21 - 30 menu", value: 3 },
+      { label: "31 - 40 menu", value: 4 },
+      { label: ">= 41 menu", value: 5 },
+    ],
+  },
+  {
     name: "kebersihan",
-    title: "Kebersihan",
+    title: "Kebersihan (Pendukung)",
     desc: "Pilih tingkat kebersihan.",
     options: [
       { label: "Sangat kotor", value: 1 },
@@ -100,7 +100,7 @@ export default function SPKInput() {
 
   const navigate = useNavigate();
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -116,14 +116,13 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
       const tenants = res.data.data;
 
-      // --- PENERJEMAH TEKS KE ANGKA (1-5 & 1-10) ---
       const getHargaLevel = (hargaStr: string) => {
         if (!hargaStr) return 3;
         const h = hargaStr.toLowerCase();
         if (h.includes("< 15") || h.includes("sangat murah")) return 5;
         if (h.includes("15.000 - 25.000") || h.includes("murah")) return 4;
         if (h.includes("25.000 - 50.000") || h.includes("sedang")) return 3;
-        if (h.includes("50.000 - 100.000") || h.includes("mahal") && !h.includes("sangat mahal")) return 2;
+        if ((h.includes("50.000 - 100.000") || h.includes("mahal")) && !h.includes("sangat mahal")) return 2;
         if (h.includes("> 100") || h.includes("sangat mahal")) return 1;
         return 3;
       };
@@ -147,7 +146,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         if (totalMenu <= 20) return 2;
         if (totalMenu <= 30) return 3;
         if (totalMenu <= 40) return 4;
-        return 5; 
+        return 5;
       };
 
       const getJamLevel = (jamTeks: string | undefined) => {
@@ -168,41 +167,60 @@ const handleSubmit = async (e: React.FormEvent) => {
       const evaluatedTenants = tenants.map((tenant: any) => {
         const levelHarga = getHargaLevel(tenant.harga);
         const levelRating = getRatingLevel(tenant.ratingMaps);
-        const levelMenu = getMenuLevel(tenant.totalMenu); 
         const levelJam = getJamLevel(tenant.jamOperasional);
-        const levelFasilitas = 3;
-        const levelKebersihan = 3;
+        const levelMenu = getMenuLevel(tenant.totalMenu);
+        const levelFasilitas = tenant.fasilitasLevel || 3; // Asumsi ada konversi fasilitas
+        const levelKebersihan = tenant.kebersihanLevel || 3; // Asumsi ada konversi kebersihan
 
-        // HITUNG SELISIH (GAP) - Makin mendekati 0 makin bagus!
+        // 1. CORE FACTOR GAP (Faktor Prioritas)
         const gapHarga = Math.abs(levelHarga - bobot.harga);
         const gapJam = Math.abs(levelJam - bobot.jamOperasional);
+        const gapRating = Math.abs(levelRating - bobot.rating);
+        const coreGap = gapHarga + gapJam + gapRating;
+
+        // 2. SECONDARY FACTOR GAP (Faktor Pendukung)
         const gapFasilitas = Math.abs(levelFasilitas - bobot.fasilitas);
         const gapMenu = Math.abs(levelMenu - bobot.menu);
-        const gapRating = Math.abs(levelRating - bobot.rating);
         const gapKebersihan = Math.abs(levelKebersihan - bobot.kebersihan);
+        const secGap = gapFasilitas + gapMenu + gapKebersihan;
 
-        // Total Selisih Keseluruhan
-        const totalGap = gapHarga + gapJam + gapFasilitas + gapMenu + gapRating + gapKebersihan;
-        
-        // Buat skor poin untuk UI (Skor Sempurna = 35)
-        const maxScore = 35; 
-        const finalScore = maxScore - totalGap;
+        // 3. PEMBOBOTAN SKOR (Misal: max poin 100. Core penalti 15x lipat, Sec penalti 2x lipat)
+        const totalGap = coreGap + secGap;
+        const finalScore = 100 - ((coreGap * 15) + (secGap * 2)); 
 
-        return { ...tenant, score: finalScore, totalGap: totalGap };
+        return { 
+          ...tenant, 
+          score: finalScore, 
+          coreGap: coreGap, 
+          secGap: secGap, 
+          totalGap: totalGap 
+        };
       });
 
-      // PISAHKAN JADI 2 KERANJANG
-      const perfectMatches = evaluatedTenants.filter((t: any) => t.totalGap === 0);
-      const closeMatches = evaluatedTenants.filter((t: any) => t.totalGap > 0);
+      // PISAHKAN BERDASARKAN PRIORITAS MUTLAK (CORE GAP)
+      // perfect: Jika harga, jam, dan rating 100% cocok (coreGap === 0)
+      const perfectMatches = evaluatedTenants.filter((t: any) => t.coreGap === 0);
+      
+      // close: Jika ada selisih di prioritas, tapi kita cari yang selisihnya paling sedikit
+      const closeMatches = evaluatedTenants.filter((t: any) => t.coreGap > 0);
 
-      // Urutkan keranjang "mendekati" dari skor terbesar (gap terkecil)
-      perfectMatches.sort((a: any, b: any) => b.score - a.score);
-      closeMatches.sort((a: any, b: any) => b.score - a.score);
+      // PENGURUTAN MULTI-LEVEL LOGIC
+      // Urutkan yang mutlak berdasarkan kriteria pendukung terbaik
+      perfectMatches.sort((a: any, b: any) => a.secGap - b.secGap);
+      
+      // Urutkan yang "close" berdasarkan coreGap terkecil dulu. 
+      // Jika coreGap-nya sama (misal sama-sama selisih 1 tingkat), urutkan dari secGap terkecil.
+      closeMatches.sort((a: any, b: any) => {
+        if (a.coreGap !== b.coreGap) {
+          return a.coreGap - b.coreGap; // Prioritas 1
+        }
+        return a.secGap - b.secGap;     // Prioritas 2
+      });
 
       const resultData = {
-        KATEGORI: { 
+        KATEGORI: {
           perfect: perfectMatches,
-          close: closeMatches 
+          close: closeMatches
         }
       };
 
@@ -214,6 +232,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       alert("Gagal memproses rekomendasi.");
     }
   };
+
   return (
     <div className="font-sans bg-white p-8 lg:p-12 w-full">
       <form onSubmit={handleSubmit} className="w-full mx-auto">
@@ -226,10 +245,10 @@ const handleSubmit = async (e: React.FormEvent) => {
               Pilih Kriteria Harapan Anda
             </h1>
             <p className="text-gray-600">
-              Pilih spesifikasi yang paling Anda inginkan. Sistem akan mencari
-              tempat yang <strong>paling mirip</strong> dengan pilihan Anda.
-              Jika tidak ada yang sama persis, sistem akan merekomendasikan
-              tempat yang selisihnya paling sedikit.
+              Pilih spesifikasi yang paling Anda inginkan. Sistem akan memprioritaskan
+              secara mutlak <strong>Harga, Jam Operasional, dan Rating</strong>.
+              Jika tidak ada yang sama persis, sistem akan merekomendasikan tempat
+              yang nilainya paling mendekati dari ketiga kriteria prioritas tersebut.
             </p>
             <div className="mt-6 w-full h-64 rounded-2xl overflow-hidden shadow-sm border border-gray-100">
               <img
@@ -252,7 +271,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                     name={item.name}
                     value={bobot[item.name as keyof typeof bobot]}
                     onChange={handleSelectChange}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-teal-600 outline-none cursor-pointer"
+                    className={`w-full bg-gray-50 border text-gray-700 rounded-xl px-4 py-3 outline-none cursor-pointer focus:ring-2 
+                      ${item.title.includes("Prioritas") ? "border-gray-200 focus:ring-teal-600" : "border-gray-200 focus:ring-teal-600"}`}
                   >
                     {item.options.map((opt) => (
                       <option key={opt.value} value={opt.value}>

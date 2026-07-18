@@ -15,7 +15,7 @@ export default function Rekomendasi() {
         {/* Tombol Navigasi (Tabs) */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex justify-center mt-8">
-            <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200 flex">
+            <div className="bg-white p-1.5 gap-5 rounded-2xl shadow-sm border border-gray-200 flex">
               <Link
                 to="/rekomendasi/Sub"
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
