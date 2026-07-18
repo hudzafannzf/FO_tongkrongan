@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "../pages/home/Home";
 import Login from "../pages/auth/Login";
@@ -29,13 +29,15 @@ import DetailFasilitas from "../pages/fasilitas/DetailFasilitas";
 
 // Halaman Kriteria SPK
 import TenantFasilitas from "../pages/fasilitas/TenantFasilitas";
-import TenantReviewKebersihan from "../pages/tenant/TenantKebersihan"; 
+import TenantReviewKebersihan from "../pages/tenant/TenantKebersihan";
 import DetailTenant from "../pages/tenant/DetailTenant";
-import SPKPage from "../pages/SPKpage";
-import HasilSPKPage from "../pages/HasilSPKPage";
+import Bobothasil from "../pages/Bobothasil";
 import GeraiPage from "../pages/geraiPage";
 import MenuPage from "../pages/tenant/MenuPage";
-
+import Bobot from "../pages/Rekomendasi/Bobotpage";
+import Sub from "../pages/Rekomendasi/Subpage";
+import Subhasil from "../pages/Subhasil";
+import Rekomendasi from "../pages/rekomendasi";
 
 function AppRoutes() {
   return (
@@ -47,15 +49,22 @@ function AppRoutes() {
         <Route path="/register" element={<Register />} />
         <Route path="/detail/:id" element={<DetailTenant />} />
         <Route path="/detail/menu/:id" element={<MenuPage />} />
-        <Route path="/rekomendasi" element={<SPKPage />} />
-        <Route path="/admin/spk/hasil" element={<HasilSPKPage />} />
-        <Route path="/gerai" element={<GeraiPage/>}/>
+        <Route path="/rekomendasi" element={<Rekomendasi />}>
+          <Route index element={<Navigate to="bobot" replace />} />
+
+          <Route path="Sub" element={<Sub />} />
+          <Route path="Bobot" element={<Bobot />} />
+        </Route>
+        <Route path="/rekomendasi/subhasil" element={<Subhasil />} />
+        <Route path="/rekomendasi/bobothasil" element={<Bobothasil />} />
+        <Route path="/gerai" element={<GeraiPage />} />
 
         {/* TENANT ADMIN DASHBOARD GROUP */}
         <Route path="/dashboard/admin" element={<DashboardLayout />}>
           <Route index element={<DashboardAdmin />} />
 
           <Route path="tenant" element={<TenantList />} />
+          <Route path="menu/:id" element={<MenuDetail />} />
           <Route path="tenant/create" element={<TenantCreate />} />
           <Route path="tenant/edit/:id" element={<TenantEdit />} />
           <Route path="tenant/:id" element={<TenantDetail />} />
@@ -63,7 +72,6 @@ function AppRoutes() {
           <Route path="menu" element={<MenuList />} />
           <Route path="menu/create" element={<MenuCreate />} />
           <Route path="menu/edit/:id" element={<MenuEdit />} />
-          <Route path="menu/:id" element={<MenuDetail />} />
 
           <Route path="galeri" element={<ListGaleri />} />
           <Route path="galeri/create" element={<CreateGaleri />} />
@@ -73,9 +81,12 @@ function AppRoutes() {
 
           {/* MANAJEMEN KRITERIA SPK TENANT */}
           <Route path="tenant/fasilitas" element={<TenantFasilitas />} />
-          
+
           {/* 2. SELIPKAN RUTE REVIEW KEBERSIHAN (C5) DI SINI */}
-          <Route path="tenant/kebersihan" element={<TenantReviewKebersihan />} />
+          <Route
+            path="tenant/kebersihan"
+            element={<TenantReviewKebersihan />}
+          />
         </Route>
 
         {/* SUPER ADMIN DASHBOARD GROUP */}

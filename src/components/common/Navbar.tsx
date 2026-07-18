@@ -56,7 +56,7 @@ export default function Navbar() {
           </Link>
           
           <Link 
-            to="/rekomendasi" 
+            to="/rekomendasi/Sub" 
             className="relative text-purple-900/70 hover:text-purple-700 transition-all duration-300 hover:-translate-y-0.5 group"
           >
             Rekomendasi
@@ -66,7 +66,7 @@ export default function Navbar() {
         
         {auth?.user ? (
           <button 
-          className="px-6 py-2.5 text-sm font-bold text-red-500 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-200/50 hover:shadow-purple-300/50 hover:-translate-y-0.5"
+          className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-purple-700 rounded-full hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-200/50 hover:shadow-purple-300/50 hover:-translate-y-0.5"
           onClick={auth.logout}>Keluar</button>
         ) : (
           <Link 

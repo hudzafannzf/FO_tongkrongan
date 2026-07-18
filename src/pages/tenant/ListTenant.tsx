@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
 import { getTenants, deleteTenant } from "../../services/tenantService";
 import { Link } from "react-router-dom";
+import { Eye, Trash2, PlusCircle, Utensils, MapPin, Clock } from "lucide-react";
+import defaultLogo from "../../assets/images/default_logo.png";
 
 function TenantList() {
   const [tenants, setTenants] = useState<any[]>([]);
-
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   const loadData = async () => {
     try {
       const data = await getTenants();
-      
-      // Proteksi agar .map() tidak bikin layar putih total
-      if (Array.isArray(data)) {
-        setTenants(data);
-      } else if (data && Array.isArray(data.data)) {
-        setTenants(data.data);
-      } else if (data && data.tenants && Array.isArray(data.tenants)) {
-        setTenants(data.tenants);
-      }
+      const result = Array.isArray(data) ? data : (data?.data || data?.tenants || []);
+      console.log("Data Tenant yang diterima:", result);
+      setTenants(result);
     } catch (error) {
       console.error("Gagal mengambil data tenant:", error);
     }
@@ -29,8 +24,7 @@ function TenantList() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Yakin hapus tenant?")) return;
-
+    if (!confirm("Yakin ingin menghapus tenant ini?")) return;
     try {
       await deleteTenant(id);
       loadData();
@@ -41,94 +35,75 @@ function TenantList() {
   };
 
   return (
-    <div>
-      <div style={{ padding: "20px" }}>
-        <h1>Daftar Tenant</h1>
-
-        {/* Tombol Ajukan Tenant */}
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">Daftar Tenant</h1>
         {user?.role === "TENANT_ADMIN" && (
-          <>
-            <Link to="/dashboard/admin/tenant/create">
-              <button style={{ cursor: "pointer", padding: "6px 12px" }}>Ajukan Tenant</button>
-            </Link>
-
-            <br />
-            <br />
-          </>
+          <Link to="/dashboard/admin/tenant/create">
+            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+              <PlusCircle size={18} /> Ajukan Tenant
+            </button>
+          </Link>
         )}
+      </div>
 
-        <table border={1} cellPadding={10} style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f2f2f2" }}>
-              <th>Nama</th>
-              <th>Alamat</th>
-              <th>Jam Operasional</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {tenants.map((tenant) => (
+          <div key={tenant.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow flex flex-col overflow-hidden">
+            
+            {/* LOGO TENANT */}
+            <div className="h-32 bg-gray-100 overflow-hidden">
+              <img 
+                src={tenant.logo ? `http://localhost:3000/uploads/${tenant.logo}` : defaultLogo} 
+                alt={tenant.nama}
+                className="w-full h-full object-cover"
+                onError={(e) => (e.currentTarget.src = defaultLogo)} // Fallback jika link gambar rusak
+              />
+            </div>
 
-          <tbody>
-            {tenants.map((tenant) => (
-              <tr key={tenant.id}>
-                <td>{tenant.nama}</td>
-                <td>{tenant.alamat}</td>
-                <td>{tenant.jamOperasional}</td>
+            <div className="p-5 border-b border-gray-100">
+              <h2 className="font-bold text-gray-800 text-lg truncate">{tenant.nama}</h2>
+              <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-1">
+                <MapPin size={14} />
+                <span className="truncate">{tenant.alamat}</span>
+              </div>
+            </div>
 
-                <td>
-                  {/* SUPER ADMIN */}
-                  {user?.role === "SUPER_ADMIN" && (
-                    <>
-                      <Link to={`/dashboard/superadmin/tenant/${tenant.id}`}>
-                        <button style={{ cursor: "pointer" }}>Lihat</button>
-                      </Link>
+            <div className="p-5 flex-grow space-y-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock size={16} className="text-gray-400" />
+                <span>{tenant.jamOperasional}</span>
+              </div>
+              
+              {/* FIX MENU: Cek tenant.totalMenu, kalau tidak ada, cek apakah ada tenant.menus array */}
+              <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg w-fit">
+                <Utensils size={16} />
+                <span>
+                  {tenant.totalMenu ?? (tenant.menus ? tenant.menus.length : 0)} Pilihan Menu
+                </span>
+              </div>
+            </div>
 
-                      {" "}
-
-                      <Link to={`/dashboard/superadmin/tenant/edit/${tenant.id}`}>
-                        <button style={{ cursor: "pointer" }}>Edit</button>
-                      </Link>
-
-                      {" "}
-
-                      <button
-                        onClick={() => handleDelete(tenant.id)}
-                        style={{ cursor: "pointer", color: "red" }}
-                      >
-                        Hapus
-                      </button>
-                    </>
-                  )}
-
-                  {/* TENANT ADMIN */}
-                  {user?.role === "TENANT_ADMIN" && (
-                    <>
-                      <Link to={`/dashboard/admin/tenant/${tenant.id}`}>
-                        <button style={{ cursor: "pointer" }}>Lihat</button>
-                      </Link>
-                    </>
-                  )}
-
-                  {/* PENGGUNA */}
-                  {user?.role === "PENGGUNA" && (
-                    <>
-                      <Link to={`/dashboard/admin/tenant/${tenant.id}`}>
-                        <button style={{ cursor: "pointer" }}>Lihat</button>
-                      </Link>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-
-            {tenants.length === 0 && (
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Belum ada data tenant
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            <div className="p-4 border-t border-gray-100 flex justify-end gap-2">
+              {(user?.role === "TENANT_ADMIN" || user?.role === "PENGGUNA") && (
+                <Link to={`/dashboard/admin/tenant/${tenant.id}`}>
+                  <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition">
+                    <Eye size={18} />
+                  </button>
+                </Link>
+              )}
+              
+              {user?.role === "SUPER_ADMIN" && (
+                <button
+                  onClick={() => handleDelete(tenant.id)}
+                  className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

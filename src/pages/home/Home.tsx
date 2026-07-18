@@ -102,6 +102,8 @@ export default function Home() {
         </div>
       </section>
 
+      
+
       {/* === GERAI SECTION === */}
       <section
         id="tenant-section"

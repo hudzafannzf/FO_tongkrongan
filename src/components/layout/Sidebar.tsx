@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   CheckCircle,
   Building2,
-  BarChart3,
   UtensilsCrossed,
   Warehouse,
   LogOut,
@@ -51,10 +50,7 @@ function Sidebar() {
             Master Fasilitas
           </Link>
 
-          <Link style={linkStyle} to="/dashboard/superadmin/spk">
-            <BarChart3 size={20} />
-            SPK
-          </Link>
+
         </>
       )}
 

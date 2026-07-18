@@ -1,13 +1,13 @@
-import { Shield, Users, Building2, Clock, Settings, Bell } from "lucide-react";
+import { Shield, Users, Building2, Clock, Settings } from "lucide-react";
 
 function DashboardSuperAdmin() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   // Dummy data untuk statistik
   const stats = [
-    { label: "Total Tenant", value: "24", icon: <Building2 size={20} />, color: "text-blue-600" },
-    { label: "Pending Approval", value: "3", icon: <Clock size={20} />, color: "text-amber-600" },
-    { label: "Total User", value: "156", icon: <Users size={20} />, color: "text-teal-600" },
+    { label: "Total Tenant", value: "5", icon: <Building2 size={20} />, color: "text-blue-600" },
+    { label: "Pending Approval", value: "0", icon: <Clock size={20} />, color: "text-amber-600" },
+    { label: "Total User", value: "5", icon: <Users size={20} />, color: "text-teal-600" },
   ];
 
   return (
